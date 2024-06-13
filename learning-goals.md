@@ -6,7 +6,7 @@
 
 - git
 
-- IDE (VSCode?)
+- IDE (VSCode)
 
 - GitHub account
 
