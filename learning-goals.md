@@ -1,6 +1,6 @@
 ## Installation and configuration
 
-- A terminal (git bash)?
+- A terminal (git bash)
 
 - Miniconda
 
