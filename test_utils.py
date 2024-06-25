@@ -27,6 +27,6 @@ ds_expected_after = load_poses.from_numpy(
 
 def test_reshape_loaded_ds():
     ds_after = reshape_loaded_ds(
-        ds_before, ["resident", "intruder"], [f"kpt{i}" for i in range(10)]
+        ds_before, ["ind1", "ind2"], [f"kpt{i}" for i in range(10)]
     )
     xr.testing.assert_allclose(ds_after, ds_expected_after)
