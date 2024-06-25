@@ -4,8 +4,6 @@ from movement.io import load_poses
 
 def reshape_loaded_ds(
     ds: xr.Dataset,
-    n_true_inds: int,
-    n_true_kpts: int,
     true_ind_names: list[str],
     true_kpt_names: list[str],
 ) -> xr.Dataset:
@@ -13,20 +11,17 @@ def reshape_loaded_ds(
     Reshape the loaded dataset to have the correct dimensions.
 
     This assumes that multiple-animals were tracked using sinlge-animal
-    DeepLabCut, and corrected the dataset given the known number of
+    DeepLabCut, and corrects the dataset given the known number of
     individuals and keypoints.
 
     Parameters
     ----------
     ds : xr.Dataset
         The dataset to reshape.
-    n_true_inds : int
-        The number of individuals in the dataset.
-    n_true_kpts : int
-        The number of keypoints per individual.
     true_ind_names : list[str]
         The names of the individuals.
     true_kpt_names : list[str]
+        The names of the keypoints.
 
     Returns
     -------
@@ -37,6 +32,8 @@ def reshape_loaded_ds(
     position_array = ds.position.values
     confidence_array = ds.confidence.values
 
+    n_true_inds = len(true_ind_names)
+    n_true_kpts = len(true_kpt_names)
     n_frames = position_array.shape[0]
     n_space = position_array.shape[-1]
     new_shape = (n_frames, n_true_inds, n_true_kpts, n_space)
