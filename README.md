@@ -26,16 +26,23 @@ need to create a new [conda](https://docs.anaconda.com/miniconda/) environment
 with the required dependencies, which are listed in the 
 [environment.yml](./environment.yml) file.
 
-To create and activate the environment, run the following commands on your
-terminal:
+To create the required environment, follow these steps:
 
-```bash
-conda env create -n In2Research2024 -f environment.yml
-conda activate In2Research2024
-```
+1. Clone the repository and navigate to the repository folder:
+    ```bash
+    git clone https://github.com/neuroinformatics-unit/    In2Research-2024
+    cd In2Research-2024
+    ```
+2. Create the conda environment from the environment file and activate it:
+    ```bash
+    conda env create -n In2Research2024 -f environment.yml
+    conda activate In2Research2024
+    ```
 
 Note that we have named the environment `In2Research2024`, but you can choose
-any name you like. Beware that the environment specifically contains
+any name you like. 
+
+Beware that the environment specifically contains
 `movement==0.0.19`, because that's the version of the `movement` package that
 was used during the placement. If you are using newer versions of the package,
 some of the code may need adjustments, as the syntax is likely to have changed.
