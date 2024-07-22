@@ -30,7 +30,7 @@ To create the required environment, follow these steps:
 
 1. Clone the repository and navigate to the repository folder:
     ```bash
-    git clone https://github.com/neuroinformatics-unit/    In2Research-2024
+    git clone https://github.com/neuroinformatics-unit/In2Research-2024
     cd In2Research-2024
     ```
 2. Create the conda environment from the environment file and activate it:
