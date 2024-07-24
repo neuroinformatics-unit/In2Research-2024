@@ -1,3 +1,4 @@
+import numpy as np
 import xarray as xr
 from movement.io import load_poses
 
@@ -132,3 +133,55 @@ def clean_data(
     )
 
     return ds_clean
+
+
+def magnitude(data: xr.DataArray) -> xr.DataArray:
+    """Compute the magnitude in space.
+
+    The magnitude is computed as the Euclidean norm of a vector
+    with spatial components ``x`` and ``y`` in Cartesian coordinates.
+
+    Parameters
+    ----------
+    data : xarray.DataArray
+        The input data containing ``space`` as a dimension,
+        with ``x`` and ``y`` in the dimension coordinate.
+
+    Returns
+    -------
+    xarray.DataArray
+        An xarray DataArray representing the magnitude of the vector
+        in space. The output has no spatial dimension.
+
+
+    """
+    return xr.apply_ufunc(
+        np.linalg.norm,
+        data,
+        input_core_dims=[["space"]],
+        kwargs={"axis": -1},
+    )
+
+
+def normalize(data: xr.DataArray) -> xr.DataArray:
+    """Normalize data by the magnitude in space.
+
+    Parameters
+    ----------
+    data : xarray.DataArray
+        The input data containing ``space`` as a dimension,
+        with ``x`` and ``y`` in the dimension coordinate.
+
+    Returns
+    -------
+    xarray.DataArray
+        An xarray DataArray representing the normalized data,
+        having the same dimensions as the input data.
+
+    Notes
+    -----
+    Where the input values are 0 for both ``x`` and ``y``, the normalized
+    values will be NaN, because of zero-division.
+
+    """
+    return data / magnitude(data)
