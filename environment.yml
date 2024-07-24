@@ -1,0 +1,9 @@
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pytables
+  - jupyter
+  - pip:
+    - movement==0.0.19
