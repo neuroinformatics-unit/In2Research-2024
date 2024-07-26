@@ -161,7 +161,7 @@ def plot_head_orientation_polar_histogram(
 
     # plot histogram using xarray's built-in histogram function
     angles.plot.hist(
-        bins=np.linspace(-np.pi, np.pi, n_bins + 1), color=color, ax=ax
+        bins=np.linspace(-np.pi, np.pi, n_bins + 1), color=color, ax=ax, density=True
     )
 
     # axes settings
@@ -176,4 +176,3 @@ def plot_head_orientation_polar_histogram(
     )
     xticklabels = [str(t) + "\N{DEGREE SIGN}" for t in xticks_in_deg]
     ax.set_xticklabels(xticklabels)
-    ax.set_yticklabels([])  # remove y-tick labels
