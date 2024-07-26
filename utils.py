@@ -1,3 +1,5 @@
+import numpy as np
+
 import xarray as xr
 from movement.io import load_poses
 
@@ -49,3 +51,138 @@ def reshape_loaded_ds(
     )
     ds_new.attrs["source_file"] = ds.attrs["source_file"]
     return ds_new
+
+
+def clean_data(
+    ds: xr.Dataset,
+    confidence_threshold: float = 0.9,
+    interp_max_gap: int = 25,
+    smooth_window_size: int = 7,
+    smooth_min_periods: int = 2,
+):
+    """
+    Clean the position data in the dataset using the given parameters.
+
+    The following steps are taken in order:
+    1. Drop values with confidence below the threshold `confidence_threshold`.
+    2. Linearly interpolate missing values over time, up to `interp_max_gap` frames.
+    3. Smooth the data using a rolling median with window size `smooth_window`.
+    
+    Parameters
+    ----------
+    ds : xr.Dataset
+        The dataset to clean. Must contain `position` and `confidence` variables.
+    confidence_threshold : float, optional
+        The confidence threshold below which to drop values, between 0 and 1,
+        by default 0.8.
+    interp_max_gap : int, optional
+        The maximum gap over which to interpolate missing values, by default
+        25 frames.
+    smooth_window_size : int, optional
+        The window size for the rolling median, by default 7 frames.
+    smooth_min_periods : int, optional
+        The minimum number of observations in the smoothing window required
+        to compute the median (otherwise result is NaN). Default is 2.
+
+    Returns
+    -------
+    xr.Dataset
+        The cleaned dataset.
+
+
+    Examples
+    --------
+    >>> ds_clean = clean_data(
+    >>>     ds,
+    >>>     confidence_threshold=0.9,
+    >>>     interp_max_gap=25,
+    >>>     smooth_window=7,
+    >>>     smooth_min_periods=2,
+    >>> )
+    """
+
+    # Copy the dataset to avoid modifying the original
+    ds_clean = ds.copy()
+
+    # Drop values with confidence below the threshold
+    ds_clean.update(
+        {
+            "position": ds_clean.move.filter_by_confidence(
+                threshold=confidence_threshold, print_report=False
+            )
+        }
+    )
+
+    # Interpolate missing values
+    ds_clean.update(
+        {
+            "position": ds_clean.move.interpolate_over_time(
+                method="linear", max_gap=interp_max_gap, print_report=False
+            )
+        }
+    )
+
+    # Smooth the data
+    ds_clean.update(
+        {
+            "position": ds_clean.move.median_filter(
+                window=smooth_window_size,
+                min_periods=smooth_min_periods,
+                print_report=False,
+            )
+        }
+    )
+
+    return ds_clean
+
+
+def magnitude(data: xr.DataArray) -> xr.DataArray:
+    """Compute the magnitude in space.
+
+    The magnitude is computed as the Euclidean norm of a vector
+    with spatial components ``x`` and ``y`` in Cartesian coordinates.
+
+    Parameters
+    ----------
+    data : xarray.DataArray
+        The input data containing ``space`` as a dimension,
+        with ``x`` and ``y`` in the dimension coordinate.
+
+    Returns
+    -------
+    xarray.DataArray
+        An xarray DataArray representing the magnitude of the vector
+        in space. The output has no spatial dimension.
+
+
+    """
+    return xr.apply_ufunc(
+        np.linalg.norm,
+        data,
+        input_core_dims=[["space"]],
+        kwargs={"axis": -1},
+    )
+
+
+def normalize(data: xr.DataArray) -> xr.DataArray:
+    """Normalize data by the magnitude in space.
+
+    Parameters
+    ----------
+    data : xarray.DataArray
+        The input data containing ``space`` as a dimension,
+        with ``x`` and ``y`` in the dimension coordinate.
+
+    Returns
+    -------
+    xarray.DataArray
+        An xarray DataArray representing the normalized data,
+        having the same dimensions as the input data.
+
+    Notes
+    -----
+    Where the input values are 0 for both ``x`` and ``y``, the normalized
+    values will be NaN, because of zero-division.
+
+    """
+    return data / magnitude(data)
