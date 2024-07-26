@@ -124,16 +124,14 @@ def plot_head_orientation_polar_histogram(
     Plot a polar histogram of the resident's head orientation relative to the 
     intruder's head vector.
 
-    The angles should be given in radians and represent the arccos of the
-    dot product between the normalised intruder's head vector (in practice
-    a vector perependicular to the mid-ear line, pointing forwards)
-    and the normalised vector pointing from the intruder's head towards the
-    resident's head (in practice, a vector starting at intruder's ear midpoint
-    and ending at the resident's 'neck' keypoint). The range of the angles
-    should be [0, pi] (i.e. [0, 180] degrees), with 0 meaning that the resident
-    is exactly ahead of the intruder, pi meaning that the resident is exactly
-    behind the intruder, and pi/2 meaning that the resident is perpendicular
-    to the intruder's head vector.
+    The angles should be given in radians and range from -pi to pi
+    (-180 to 180 degrees), with 0 meaning that the resident is exactly ahead of
+    the intruder (i.e. the intruder's head vector is pointing directly at the
+    resident head), while pi/-pi means that the resident is directly behind
+    the intruder. Positive angles indicate that the resident is to the left
+    of the intruder's head vector, while negative angles indicate that the
+    resident is to the right.
+
 
     Parameters
     ----------
@@ -155,29 +153,27 @@ def plot_head_orientation_polar_histogram(
 
     # compute number of bins
     bin_width_deg = 15  # width of the bins in degrees
-    n_bins = int(180 / bin_width_deg)
+    n_bins = int(360 / bin_width_deg)
 
     # initialise figure with polar projection
-
     intruder_sex = intruder_id[:-1  ]
     color = "blue" if intruder_sex == "male" else "orange"
 
     # plot histogram using xarray's built-in histogram function
     angles.plot.hist(
-        bins=np.linspace(0, np.pi, n_bins + 1), color=color, ax=ax
+        bins=np.linspace(-np.pi, np.pi, n_bins + 1), color=color, ax=ax
     )
 
     # axes settings
     ax.set_title(f"Resident: {resident_id} | Intruder: {intruder_id}")
-    ax.set_thetamin(0)
-    ax.set_thetamax(180)
-    ax.set_theta_direction(-1)  # theta increases in clockwise direction
-    ax.set_theta_offset(np.pi/2)  # set zero at the right
-    #ax.set_xlabel("")  # remove default x-label from xarray's plot.hist()
+    ax.set_theta_offset(np.pi/2)  # set zero at the top
 
     # set xticks to match the phi values in degrees
-    n_xtick_edges = 5
-    ax.set_xticks(np.linspace(0, np.pi, n_xtick_edges))
-    xticklabels = [str(t) + "\N{DEGREE SIGN}" for t in np.linspace(0, 180, n_xtick_edges)]
+    n_xtick_edges = 9
+    ax.set_xticks(np.linspace(0, 2*np.pi, n_xtick_edges)[:-1])
+    xticks_in_deg = (
+        list(range(0, 180 + 45, 45)) + list(range(0, -180, -45))[-1:0:-1]
+    )
+    xticklabels = [str(t) + "\N{DEGREE SIGN}" for t in xticks_in_deg]
     ax.set_xticklabels(xticklabels)
     ax.set_yticklabels([])  # remove y-tick labels
