@@ -74,6 +74,7 @@ def plot_histogram_with_percentiles(
     percentiles = [25, 50, 75],
     n_bins = 30,
     xlabel: Optional[str] = None,
+    density: bool = False,
     save_path: Optional[str | Path] = None,
 ):
     """
@@ -89,13 +90,16 @@ def plot_histogram_with_percentiles(
         The number of bins to use in the histogram, by default 30.
     xlabel : str, optional
         The label for the x-axis, by default None.
+    density : bool, optional
+        Whether to normalise the histogram so that the integral over the range
+        is 1, by default False.
     save_path : str or Path, optional
         The path to save the figure to, by default None (do not save).
     """
     values = np.nanpercentile(da, percentiles)
 
     fig, ax = plt.subplots(1, 1)
-    da.plot.hist(bins=n_bins, ax=ax)
+    da.plot.hist(bins=n_bins, ax=ax, density=density)
     for perc, value in zip(percentiles, values):
         ax.axvline(value, color="red", linestyle="--")
         ax.text(
